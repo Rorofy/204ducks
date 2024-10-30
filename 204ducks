@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+
+import sys
+from math import *
+
+def check_input():
+    if (len(sys.argv) != 2):
+        sys.exit(84)
+    try:
+        av1 = float(sys.argv[1])
+        if (av1 < 0 or av1 > 2.5):
+            sys.exit(84)
+    except BaseException:
+        sys.exit(84)
+    return av1
+
+def get_proba(a, t):
+    return a * exp(-t) + (4 - 3 * a) * exp(-2 * t) + (2 * a - 4) * exp(-4 * t)
+
+def get_proba2(a, t):
+    return -a * exp(-t) - (4 - 3 * a) / 2 * exp(-2 * t) - (2 * a - 4) / 4 * exp(-4 * t)
+
+def print_average_time(a):
+    res = 0.0
+    t = 0.0
+    while t < 10:
+        res += get_proba(a, t) * t / 1000
+        t += 0.001
+    print("Average return time: %dm %ds" % (int(res), ceil((res - int(res)) * 60)))
+    return res
+
+def print_standard_deviation(a, average_time):
+    res = 0.0
+    t = 0.0
+    while t < 100:
+        res += pow(t - average_time, 2) * get_proba(a, t) / 1000
+        t += 0.001
+    print("Standard deviation: %.3f" % sqrt(res))
+
+def print_time_back(a, p):
+    t = 0.0
+    while t < 1000:
+        if get_proba2(a, t / 60) - get_proba2(a, 0) >= p:
+            if (p == 0.5):
+                print("Time after which 50%% of the ducks are back: %dm %d%ds" % (t / 60, t % 60 / 10, t % 10))
+            if (p == 0.99):
+                print("Time after which 99%% of the ducks are back: %dm %d%ds" % (t / 60, t % 60 / 10, t % 10))
+            return
+        t += 0.002
+
+def print_percent_back(a):
+    back_1_min = (get_proba2(a, 1) - get_proba2(a, 0)) * 100
+    back_2_min = (get_proba2(a, 2) - get_proba2(a, 0)) * 100
+    print("Percentage of ducks back after 1 minute: %.1f%%" % back_1_min)
+    print("Percentage of ducks back after 2 minutes: %.1f%%" % back_2_min)
+
+def main():
+    av1 = check_input()
+    average_time = print_average_time(av1)
+    print_standard_deviation(av1, average_time)
+    print_time_back(av1, 0.5)
+    print_time_back(av1, 0.99)
+    print_percent_back(av1)
+    
+main()
